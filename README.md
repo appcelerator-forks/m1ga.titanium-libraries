@@ -1,4 +1,4 @@
-== downloader ==
+## downloader ##
 
 download files to save them or just read them (e.g. json).
 Usage:
@@ -8,7 +8,7 @@ require("/download").create({
 }).get();
 
 
-=== parameters ===
+### parameters ###
 - url: string
 - download: boolean
 - overwrite: boolean
