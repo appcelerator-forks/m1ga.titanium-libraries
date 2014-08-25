@@ -1,14 +1,14 @@
-# Titanium libraries #
+# Titanium libraries
 
 Some useful libraries that will be needed in almost every app and you don't want to write all the time.
 
-## How to use them ##
+## How to use them
 
 create a lib folder in your projectname/app/ folder and place the js files there.
 
-## Libraries ##
+## Libraries
 
-### downloader ###
+### downloader
 
 download files to save them or just read them (e.g. json).
 Usage:
@@ -18,7 +18,7 @@ require("/download").create({
 }).get();
 ~~~
 
-#### parameters ####
+#### parameters
 - url: string
 - download: boolean
 - overwrite: boolean
@@ -29,9 +29,9 @@ require("/download").create({
 - username: string (htaccess)
 - timeout: int
 
-### geo ###
+### geo
 
-library to add geo services to android and ios
+library to add geo services to Android and iOs
 ~~~
 var geo = require("geo").create({
 	updatePosition:callback
@@ -50,5 +50,5 @@ Ti.App.Properties.getDouble("lat");
 Ti.App.Properties.getDouble("lon");
 ~~~
 
-#### parameters ####
+#### parameters
 - updatePosition: callback function
