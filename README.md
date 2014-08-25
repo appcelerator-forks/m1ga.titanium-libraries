@@ -8,7 +8,37 @@ create a lib folder in your projectname/app/ folder and place the js files there
 
 ## Libraries
 
-### downloader
+___
+
+### api.js
+
+make a call to a web-API and receive the feedback
+Usage:
+~~~
+require("/api").create({
+	url: SERVER + "api.php",
+	type: "POST",
+	parameter: {
+		service: "login",
+		email: "test@test.com",
+		password: Ti.Utils.sha1("password")
+	},
+	success: onSuccess,
+	error: onErrorLogin
+});
+~~~
+
+#### parameters
+- url
+- type
+- paramater
+- success
+- error
+
+
+___
+
+### downloader.js
 
 download files to save them or just read them (e.g. json).
 Usage:
@@ -28,8 +58,11 @@ require("/download").create({
 - password: string (htaccess)
 - username: string (htaccess)
 - timeout: int
+- customname: string - new filename for the download
 
-### geo
+___
+
+### geo.js
 
 library to add geo services to Android and iOs
 ~~~
