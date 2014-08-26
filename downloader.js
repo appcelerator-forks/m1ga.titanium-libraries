@@ -20,6 +20,7 @@ function Download(opt) {
     var pwd = opt.password || null;
     var username = opt.username || null;
     var customname = opt.filename || null;
+    var isDebug = opt.debug || false;
 
     if (OS_ANDROID) {
         dir = Ti.Filesystem.externalStorageDirectory;
@@ -44,7 +45,7 @@ function Download(opt) {
 
         if (!download || (download && overwrite) || (!f.exists() && fname != "null")) {
 
-            Ti.API.info("get: " + url);
+            if (isDebug) Ti.API.info("get: " + url);
 
             xhr.ondatastream = function(e) {
                 if (xhr.getResponseHeader('Content-Length')) {
@@ -59,11 +60,11 @@ function Download(opt) {
             xhr.onload = function() {
                 if (this.readyState == 4) {
                     var content = null;
-                    Ti.API.info("done");
+
                     if (download) {
                         // save file
                         var f = Ti.Filesystem.getFile(dir, folder, fname);
-                        Ti.API.info(f.nativePath);
+                        if (isDebug) Ti.API.info("saving as: " +f.nativePath);
                         f.write(this.responseData);
                         f = null;
                     } else {
@@ -95,7 +96,7 @@ function Download(opt) {
                 }
             };
             xhr.onerror = function(e) {
-                Ti.API.info("download error " + JSON.stringify(e));
+                if (isDebug) Ti.API.info("download error " + JSON.stringify(e));
                 if (error) error({
                     url: url,
                     file: fname
@@ -118,7 +119,7 @@ function Download(opt) {
         } 
         else {
             // already there
-            Ti.API.info("skipping " + url);
+            if (isDebug) Ti.API.info("skipping " + url);
             if (success) success({
                 url: url,
                 file: fname

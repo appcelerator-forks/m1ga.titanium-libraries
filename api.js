@@ -7,6 +7,7 @@ function API(opt) {
     var type = opt.type;
     var success = (opt.success) ? opt.success : null;
     var error = (opt.error) ? opt.error : null;
+    var isDebug = opt.debug || false;
     var parameter = {};
     for (var obj in opt.parameter) {
         parameter[obj] = (obj != "media") ? String(opt.parameter[obj]) : opt.parameter[obj];
@@ -22,14 +23,13 @@ function API(opt) {
         onerror: function(e) {
             if (error)
                 error();
-            //Ti.API.info(e);
         },
         onload: function(e) {
 
             if (this.readyState === 4) {
                 // download done
                 var data = "";
-                Ti.API.info(this.responseText);
+                if (isDebug) Ti.API.info(this.responseText);
                 if (this.responseText !== "") {
                     data = JSON.parse(this.responseText);
 
@@ -51,11 +51,11 @@ function API(opt) {
             if (opt.binary) {
                 xhr.setRequestHeader("ContentType", "multipart/form-data");
             }
-            Ti.API.info("sending..");
+            if (isDebug) Ti.API.info("sending..");
             xhr.open(type, url);
             xhr.send(parameter);
         } else {
-            Ti.API.info("offline");
+            if (isDebug) Ti.API.info("offline");
             if (error) {
                 error();
             }
@@ -67,7 +67,7 @@ function API(opt) {
             xhr.open(type, url);
             xhr.send();
         } else {
-            Ti.API.info("offline");
+            if (isDebug) Ti.API.info("offline");
             if (error) {
                 error();
             }
