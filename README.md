@@ -6,6 +6,11 @@ Some useful libraries that will be needed in almost every app and you don't want
 
 create a lib folder in your projectname/app/ folder and place the js files there.
 
+
+## Changelog
+- api.js: cacheID and cacheTime: API will pause [cacheTime] seconds. cacheID should be a string to identify the call
+- geo.js: don't call callback when coordinates are the same as before
+
 ## Libraries
 
 ___
@@ -24,16 +29,20 @@ require("/api").create({
 		password: Ti.Utils.sha1("password")
 	},
 	success: onSuccess,
-	error: onErrorLogin
+	error: onErrorLogin,
+	cacheID: "apiCall",
+	cacheTime: 3
 });
 ~~~
 
 #### parameters
 - url
-- type
-- paramater
-- success
-- error
+- type: POST or GET (default)
+- paramater: array
+- success: callback function
+- error: callback function
+- cacheID: ID to identify this call
+- cacheTime: during cacheTime the call won't be executed (use this to stop calling the url to often)
 
 
 ___
