@@ -3,12 +3,15 @@ exports.create = function(opt) {
 };
 
 function API(opt) {
+
     var url = opt.url;
-    var type = opt.type;
-    var success = (opt.success) ? opt.success : null;
-    var error = (opt.error) ? opt.error : null;
-    var isDebug = opt.debug || false;
+    var type = opt.type||"GET"; // type of the request (POST or GET)
+    var success = (opt.success) ? opt.success : null;   // success callback function
+    var error = (opt.error) ? opt.error : null; // error callback function
+    var isDebug = opt.debug || false;   // display debug output
+    var cacheID = "api_"+opt.cacheID || "lastApi"+url; // string used to store the cache time
     var parameter = {};
+    var cacheTime = opt.cacheTime || 0; // default 3 seconds between two checks
     for (var obj in opt.parameter) {
         parameter[obj] = (obj != "media") ? String(opt.parameter[obj]) : opt.parameter[obj];
     }
@@ -17,6 +20,9 @@ function API(opt) {
     parameter["os"] = (OS_ANDROID) ? "android" : "ios";
     if (Ti.App.Properties.hasProperty("session")) {
         parameter["session"] = Ti.App.Properties.getString("session");
+    }
+    if (cacheTime>0 && !Ti.App.Properties.hasProperty(cacheID)) {
+        Ti.App.Properties.setString(cacheID,0);
     }
 
     var xhr = Ti.Network.createHTTPClient({
@@ -44,33 +50,42 @@ function API(opt) {
         timeout: 10000
     });
 
-    if (type == "POST") {
-        // POST
-        //
-        if (Ti.Network.online) {
-            if (opt.binary) {
-                xhr.setRequestHeader("ContentType", "multipart/form-data");
+    // only check if cache time is over
+    var date = new Date();
+    if (cacheTime===0 || date - new Date(Ti.App.Properties.getString(cacheID))>cacheTime*1000) {
+
+        Ti.App.Properties.setString(cacheID, date);
+
+        if (type == "POST") {
+            // POST
+            //
+            if (Ti.Network.online) {
+                if (opt.binary) {
+                    xhr.setRequestHeader("ContentType", "multipart/form-data");
+                }
+                if (isDebug) Ti.API.info("sending..");
+                xhr.open(type, url);
+                xhr.send(parameter);
+            } else {
+                if (isDebug) Ti.API.info("offline");
+                if (error) {
+                    error();
+                }
             }
-            if (isDebug) Ti.API.info("sending..");
-            xhr.open(type, url);
-            xhr.send(parameter);
         } else {
-            if (isDebug) Ti.API.info("offline");
-            if (error) {
-                error();
+            // GET
+            //
+            if (Ti.Network.online) {
+                xhr.open(type, url);
+                xhr.send();
+            } else {
+                if (isDebug) Ti.API.info("offline");
+                if (error) {
+                    error();
+                }
             }
         }
     } else {
-        // GET
-        //
-        if (Ti.Network.online) {
-            xhr.open(type, url);
-            xhr.send();
-        } else {
-            if (isDebug) Ti.API.info("offline");
-            if (error) {
-                error();
-            }
-        }
+        if (isDebug) Ti.API.info("Skipping request");
     }
 }

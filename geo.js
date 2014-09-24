@@ -9,7 +9,7 @@ function Geo(opt) {
     var lat = 0;
     var hasGeo = false;
     var isNetwork = false;
-    var updatePosition = (opt != null && opt.updatePosition != null) ? opt.updatePosition : null;
+    var updatePosition = (opt !== null && opt.updatePosition !== null) ? opt.updatePosition : null;
 
     this.checkGeo = function () {
         return hasGeo;
@@ -81,6 +81,8 @@ function Geo(opt) {
         } else {
             Ti.API.info("Geo disabled");
             hasGeo = false;
+            Ti.App.Properties.setDouble("lat", 0);
+            Ti.App.Properties.setDouble("lon", 0);
         }
     };
 
@@ -89,23 +91,27 @@ function Geo(opt) {
 
         if (e.error) {
             //
-            hasGeo = false;
+            //hasGeo = false;
 
         } else {
 
             if (e.coords) {
                 lat = parseFloat(e.coords.latitude).toFixed(5);
                 lon = parseFloat(e.coords.longitude).toFixed(5);
-                Ti.App.Properties.setDouble("lat", lat);
-                Ti.App.Properties.setDouble("lon", lon);
-                if (updatePosition) {
 
-                    var date = new Date();
-                    Ti.App.Properties.setString("lastLoc", date);
-                    updatePosition();
+                // check if its really a new position
+                if (Ti.App.Properties.getDouble("lat")!=lat && Ti.App.Properties.getDouble("lon")!=lon) {
+                    Ti.API.info("Got new location: " + lat + " - " + lon);
+                    Ti.App.Properties.setDouble("lat", lat);
+                    Ti.App.Properties.setDouble("lon", lon);
+                    if (updatePosition) {
+
+                        var date = new Date();
+                        Ti.App.Properties.setString("lastLoc", date);
+                        updatePosition();
+                    }
+                    hasGeo = true;
                 }
-                hasGeo = true;
-
             }
         }
     }
@@ -122,6 +128,7 @@ function Geo(opt) {
             Titanium.Geolocation.removeEventListener('location', location);
             locationAdded = false;
             hasGeo = false;
+            Ti.API.info("remove geo events");
 
         }
     }
@@ -130,7 +137,7 @@ function Geo(opt) {
         if (!locationAdded) {
             Titanium.Geolocation.addEventListener('location', location);
             locationAdded = true;
-
+            Ti.API.info("add geo events");
         }
     }
 
@@ -141,7 +148,7 @@ function Geo(opt) {
         var lat1 = opt.lat;
         var lon1 = opt.lon;
 
-        if (lat1 != null && lon1 != null && lat != null && lon != null && lat != 0 && lon != 0) {
+        if (lat1 !== null && lon1 !== null && lat !== null && lon !== null && lat !== 0 && lon !== 0) {
             // distance
             var dLat = (lat - lat1) * Math.PI / 180;
             var dLon = (lon - lon1) * Math.PI / 180;
