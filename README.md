@@ -8,6 +8,9 @@ create a lib folder in your projectname/app/ folder and place the js files there
 
 
 ## Changelog
+- api.js: fix for GET; added noParameter parameter to make clean calls without standard parameters
+- push.js: WIP
+
 - api.js: cacheID and cacheTime: API will pause [cacheTime] seconds. cacheID should be a string to identify the call
 - geo.js: don't call callback when coordinates are the same as before
 
@@ -43,7 +46,7 @@ require("/api").create({
 - error: callback function
 - cacheID: ID to identify this call
 - cacheTime: during cacheTime the call won't be executed (use this to stop calling the url to often)
-
+- noParameter: do not add any parameters to the call
 
 ___
 
