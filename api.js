@@ -13,6 +13,7 @@ function API(opt) {
     var parameter = {};
     var cacheTime = opt.cacheTime || 0; // default 3 seconds between two checks
     var noParameter = opt.noParameter || false; // add no parameter at all - clean api calls
+    var localResponse = opt.localResponse || null;
 
     if (noParameter === false) {
         for (var obj in opt.parameter) {
@@ -31,6 +32,7 @@ function API(opt) {
 
     var xhr = Ti.Network.createHTTPClient({
         onerror: function(e) {
+            console.log(e);
             if (error)
                 error();
         },
@@ -40,10 +42,10 @@ function API(opt) {
                 // download done
                 var data = "";
                 if (isDebug) Ti.API.info(this.responseText);
-                if (this.responseText !== "") {
+                if (this.responseText && this.responseText !== "" && this.responseText !== null) {
                     data = JSON.parse(this.responseText);
 
-                    if (data.alert !== undefined) {
+                    if (data && data.alert !== undefined) {
                         alert(data.alert);
                     }
                 }
@@ -68,8 +70,13 @@ function API(opt) {
                     xhr.setRequestHeader("ContentType", "multipart/form-data");
                 }
                 if (isDebug) Ti.API.info("sending..");
-                xhr.open(type, url);
-                xhr.send(parameter);
+                if (localResponse !== null) {
+                    var file = JSON.parse(Ti.Filesystem.getFile(localResponse).read());
+                    success(file);
+                } else {
+                    xhr.open(type, url);
+                    xhr.send(parameter);
+                }
             } else {
                 if (isDebug) Ti.API.info("offline");
                 if (error) {
@@ -80,18 +87,22 @@ function API(opt) {
             // GET
             //
             if (Ti.Network.online) {
-                var para = "";
-                if (noParameter === false) {
+                if (localResponse !== null) {
+                    var file = JSON.parse(Ti.Filesystem.getFile(localResponse).read());
+                    success(file);
+                } else {
+                    var para = "";
+                    if (noParameter === false) {
 
-                    para = "?";
-                    for (obj in parameter) {
-                        para += obj + "=" + parameter[obj] + "&";
+                        para = "?";
+                        for (obj in parameter) {
+                            para += obj + "=" + parameter[obj] + "&";
+                        }
                     }
+                    if (isDebug) console.log(url + para);
+                    xhr.open(type, url + para);
+                    xhr.send();
                 }
-
-                if (isDebug) console.log(url + para);
-                xhr.open(type, url + para);
-                xhr.send();
             } else {
                 if (isDebug) Ti.API.info("offline");
                 if (error) {
