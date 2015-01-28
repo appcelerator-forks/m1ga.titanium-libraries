@@ -21,13 +21,13 @@ create a lib folder in your projectname/app/ folder and place the js files there
 
 ## Libraries
 
-[downloader.js - Download files](#downloader.js)
+[downloader.js - Download files](#downloaderjs)
 
-[api.js - Make API calls](#api.js)
+[api.js - Make API calls](#apijs)
 
-[geo.js - get your current coordinates](#geo.js)
+[geo.js - get your current coordinates](#geojs)
 
-[cluster.js - cluster annotation](#cluster.js)
+[cluster.js - cluster annotation](#clusterjs)
 
 ___
 
@@ -51,7 +51,7 @@ require("/api").create({
 });
 ~~~
 
-#### parameters
+##### parameters
 - url
 - type: POST or GET (default)
 - paramater: array
@@ -81,7 +81,7 @@ function onError(e){
 }
 ~~~
 
-#### parameters
+##### parameters
 - url: string
 - download: boolean
 - overwrite: boolean
@@ -117,7 +117,7 @@ Ti.App.Properties.getDouble("lat");
 Ti.App.Properties.getDouble("lon");
 ~~~
 
-#### parameters
+##### parameters
 - updatePosition: callback function
 
 
