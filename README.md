@@ -8,6 +8,8 @@ create a lib folder in your projectname/app/ folder and place the js files there
 
 
 ## Changelog
+- download.js: use xhr.file to save memory; add parameter to callback
+
 - api.js: fix for GET; added noParameter parameter to make clean calls without standard parameters
 - push.js: WIP
 
@@ -56,8 +58,16 @@ download files to save them or just read them (e.g. json).
 Usage:
 ~~~
 require("/download").create({
-	url:"http//:...",download:false
+	url:"http//:...",success:onSuccess, error:onError
 }).get();
+
+function onSuccess(e){
+	console.log("Download done: " + JSON.stringify(e));
+}
+
+function onError(e){
+	console.log("Download error");
+}
 ~~~
 
 #### parameters
@@ -65,12 +75,13 @@ require("/download").create({
 - download: boolean
 - overwrite: boolean
 - folder: string
-- success: callback function
-- error: callback function
+- success(e): callback function (e.url, e.file, e.parameter)
+- error(e): callback function (e.url, e.file, e.parameter)
 - password: string (htaccess)
 - username: string (htaccess)
 - timeout: int
 - customname: string - new filename for the download
+- parameter: object - you can set this when starting the download and it will be in the callback return object
 
 ___
 

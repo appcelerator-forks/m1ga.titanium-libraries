@@ -1,4 +1,4 @@
-exports.create = function (opt) {
+exports.create = function(opt) {
     return new Geo(opt);
 };
 var locationAdded = false;
@@ -7,29 +7,27 @@ function Geo(opt) {
     // geolocation
     var lon = 0;
     var lat = 0;
+    var isDebug = opt.debug || false;
     var hasGeo = false;
     var isNetwork = false;
     var updatePosition = (opt !== null && opt.updatePosition !== null) ? opt.updatePosition : null;
 
-    this.checkGeo = function () {
+    this.checkGeo = function() {
         return hasGeo;
     };
 
-    this.isNetwork = function () {
+    this.isNetwork = function() {
         return isNetwork;
     };
 
-    this.remove = function () {
+    this.remove = function() {
         removeHandler();
     };
 
-    this.init = function () {
-
-        Ti.API.info("Loc service: " + Ti.Geolocation.locationServicesEnabled);
-
+    this.init = function() {
         if (Ti.Geolocation.locationServicesEnabled) {
             // iOS wants to know why
-            Ti.API.info("Geo enabled");
+            if (isDebug) Ti.API.info("Geo enabled");
             Ti.Geolocation.purpose = 'Get Current Location';
             if (OS_ANDROID) {
                 // android geo stuff
@@ -69,8 +67,7 @@ function Geo(opt) {
                 Ti.Geolocation.preferredProvider = Ti.Geolocation.PROVIDER_GPS;
             }
             hasGeo = true;
-
-            Titanium.Geolocation.getCurrentPosition(function (e) {
+            Titanium.Geolocation.getCurrentPosition(function(e) {
                 location(e);
             });
 
@@ -79,10 +76,13 @@ function Geo(opt) {
             locationAdded = true;
             isNetwork = false;
         } else {
-            Ti.API.info("Geo disabled");
+            if (isDebug) Ti.API.info("Geo disabled");
             hasGeo = false;
-            Ti.App.Properties.setDouble("lat", 0);
-            Ti.App.Properties.setDouble("lon", 0);
+            if (!Ti.App.Properties.hasProperty("lat")) {
+                // only set to zero if not available - otherwise keep old value
+                Ti.App.Properties.setDouble("lat", 0);
+                Ti.App.Properties.setDouble("lon", 0);
+            }
         }
     };
 
@@ -92,7 +92,7 @@ function Geo(opt) {
         if (e.error) {
             //
             //hasGeo = false;
-
+            if (isDebug) console.log("error");
         } else {
 
             if (e.coords) {
@@ -100,8 +100,8 @@ function Geo(opt) {
                 lon = parseFloat(e.coords.longitude).toFixed(5);
 
                 // check if its really a new position
-                if (Ti.App.Properties.getDouble("lat")!=lat && Ti.App.Properties.getDouble("lon")!=lon) {
-                    Ti.API.info("Got new location: " + lat + " - " + lon);
+                if (Ti.App.Properties.getDouble("lat") != lat && Ti.App.Properties.getDouble("lon") != lon) {
+                    if (isDebug) Ti.API.info("Got new location: " + lat + " - " + lon);
                     Ti.App.Properties.setDouble("lat", lat);
                     Ti.App.Properties.setDouble("lon", lon);
                     if (updatePosition) {
@@ -116,7 +116,7 @@ function Geo(opt) {
         }
     }
 
-    Ti.App.addEventListener("events:remove", function (e) {
+    Ti.App.addEventListener("events:remove", function(e) {
         Titanium.Geolocation.removeEventListener('location', location);
         locationAdded = false;
         hasGeo = false;
@@ -128,7 +128,7 @@ function Geo(opt) {
             Titanium.Geolocation.removeEventListener('location', location);
             locationAdded = false;
             hasGeo = false;
-            Ti.API.info("remove geo events");
+            if (isDebug) Ti.API.info("remove geo events");
 
         }
     }
@@ -137,16 +137,36 @@ function Geo(opt) {
         if (!locationAdded) {
             Titanium.Geolocation.addEventListener('location', location);
             locationAdded = true;
-            Ti.API.info("add geo events");
+            if (isDebug) Ti.API.info("add geo events");
         }
     }
 
-    this.getDistance = function (opt) {
+    this.setLon = function(l) {
+        lon = parseFloat(l).toFixed(5);
+        Ti.App.Properties.setDouble("lon", lon);
+    };
+
+    this.setLat = function(l) {
+        lat = parseFloat(l).toFixed(5);
+        Ti.App.Properties.setDouble("lat", lat);
+    };
+
+    this.lon = function() {
+        return Ti.App.Properties.getDouble("lon");
+    };
+
+    this.lat = function() {
+        return Ti.App.Properties.getDouble("lat");
+    };
+
+    this.getDistance = function(opt) {
         //Convert input values to radians
 
         var R = 6371;
         var lat1 = opt.lat;
         var lon1 = opt.lon;
+        var lat = Ti.App.Properties.getDouble("lat");
+        var lon = Ti.App.Properties.getDouble("lon");
 
         if (lat1 !== null && lon1 !== null && lat !== null && lon !== null && lat !== 0 && lon !== 0) {
             // distance
@@ -168,5 +188,4 @@ function Geo(opt) {
         Ti.App.addEventListener('pause', removeHandler);
         Ti.App.addEventListener('resume', addHandler);
     }
-
 }
