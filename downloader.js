@@ -16,11 +16,12 @@ function Download(opt) {
     var url = opt.url || "";
     var overwrite = opt.overwrite || false;
     var dir = Ti.Filesystem.applicationDataDirectory;
-    var download = opt.download || false;
+    var download = opt.download || true;
     var pwd = opt.password || null;
     var username = opt.username || null;
     var customname = opt.filename || null;
     var isDebug = opt.debug || false;
+    var parameter = opt.paramater;
 
     if (OS_ANDROID) {
         dir = Ti.Filesystem.externalStorageDirectory;
@@ -48,7 +49,7 @@ function Download(opt) {
             if (isDebug) Ti.API.info("get: " + url);
 
             xhr.ondatastream = function(e) {
-                if (xhr.getResponseHeader('Content-Length')) {
+                if (xhr && xhr.getResponseHeader('Content-Length')) {
                     var full = xhr.getResponseHeader('Content-Length') / 1024 / 1024;
                     if (progress) progress({
                         progress: e.progress
@@ -61,13 +62,7 @@ function Download(opt) {
                 if (this.readyState == 4) {
                     var content = null;
 
-                    if (download) {
-                        // save file
-                        var f = Ti.Filesystem.getFile(dir, folder, fname);
-                        if (isDebug) Ti.API.info("saving as: " +f.nativePath);
-                        f.write(this.responseData);
-                        f = null;
-                    } else {
+                    if (!download) {
                         // give back the content of the file
                         content = this.responseData;
                     }
@@ -76,7 +71,8 @@ function Download(opt) {
                     if (success) success({
                         url: url,
                         file: fname,
-                        content: content
+                        content: content,
+                        parameter: parameter
                     });
 
                     // clean up
@@ -87,7 +83,8 @@ function Download(opt) {
                     // call error function
                     if (error) error({
                         url: url,
-                        file: fname
+                        file: fname,
+                        parameter: parameter
                     });
 
                     // clean up
@@ -99,7 +96,8 @@ function Download(opt) {
                 if (isDebug) Ti.API.info("download error " + JSON.stringify(e));
                 if (error) error({
                     url: url,
-                    file: fname
+                    file: fname,
+                    parameter: parameter
                 });
                 cleanUp();
                 return false;
@@ -107,6 +105,13 @@ function Download(opt) {
 
             xhr.timeout = timeout;
             xhr.open('GET', url);
+
+            if (download) {
+                // save file
+                if (isDebug) Ti.API.info("saving as: " + f.nativePath);
+                xhr.file = f;
+            }
+
             if (pwd !== "") {
                 // set password
                 var authstr = 'Basic ' + Titanium.Utils.base64encode(username + ":" + pwd);
@@ -122,7 +127,8 @@ function Download(opt) {
             if (isDebug) Ti.API.info("skipping " + url);
             if (success) success({
                 url: url,
-                file: fname
+                file: fname,
+                parameter: parameter
             });
             cleanUp();
         }
