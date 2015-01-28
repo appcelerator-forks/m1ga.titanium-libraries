@@ -21,6 +21,14 @@ create a lib folder in your projectname/app/ folder and place the js files there
 
 ## Libraries
 
+[downloader.js - Download files](#downloader.js)
+
+[api.js - Make API calls](#api.js)
+
+[geo.js - get your current coordinates](#geo.js)
+
+[cluster.js - cluster annotation](#cluster.js)
+
 ___
 
 ### api.js
@@ -115,7 +123,7 @@ Ti.App.Properties.getDouble("lon");
 
 ___
 
-### cluster.js
+### cluster.js ###
 
 cluster will combine multiple annotations to one depending on your zoom level. It will display only annotations inside the screen and will decimal places to merge multiple points into one.
 
