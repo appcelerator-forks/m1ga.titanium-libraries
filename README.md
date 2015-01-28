@@ -8,10 +8,13 @@ create a lib folder in your projectname/app/ folder and place the js files there
 
 
 ## Changelog
+- cluster.js: cluster map annotations
 - download.js: use xhr.file to save memory; add parameter to callback
+
 
 - api.js: fix for GET; added noParameter parameter to make clean calls without standard parameters
 - push.js: WIP
+
 
 - api.js: cacheID and cacheTime: API will pause [cacheTime] seconds. cacheID should be a string to identify the call
 - geo.js: don't call callback when coordinates are the same as before
@@ -108,3 +111,30 @@ Ti.App.Properties.getDouble("lon");
 
 #### parameters
 - updatePosition: callback function
+
+
+___
+
+### cluster.js
+
+cluster will combine multiple annotations to one depending on your zoom level. It will display only annotations inside the screen and will decimal places to merge multiple points into one.
+
+~~~
+var cluster = require("cluster").create({
+	map: $.mapview	// mapview is the actual map
+});
+
+// create annotations
+var data = [];
+for (var i = 0; i < 10; ++i) {
+	var anno = Alloy.Globals.Map.createAnnotation({
+		latitude: Math.random()*50,
+		longitude: Math.random()*50,
+		title: "Annotation",
+		pincolor: Alloy.Globals.Map.ANNOTATION_RED
+	});
+	data.push(anno);
+}
+// assign it to the cluster object
+cluster.setData(data);
+~~~

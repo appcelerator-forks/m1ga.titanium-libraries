@@ -70,7 +70,6 @@ function Cluster(opt) {
         midLon = e.longitude;
         latDelta = e.latitudeDelta;
         lonDelta = e.longitudeDelta;
-        //console.log("lat: " + latDelta + " lon: " + lonDelta);
 
         if (latDelta >= 9 && lonDelta >= 14) {
             fix = -1;
@@ -87,8 +86,6 @@ function Cluster(opt) {
         } else {
             fix = 10;
         }
-
-        //console.log(fix);
 
         if (map.annoBack === undefined || map.annoBack.length === 0) {
             map.annoBack = map.annotations;
