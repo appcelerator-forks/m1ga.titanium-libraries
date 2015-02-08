@@ -21,7 +21,7 @@ function Download(opt) {
     var username = opt.username || null;
     var customname = opt.filename || null;
     var isDebug = opt.debug || false;
-    var parameter = opt.paramater;
+    var parameter = opt.parameter;
 
     if (OS_ANDROID) {
         dir = Ti.Filesystem.externalStorageDirectory;
@@ -109,7 +109,7 @@ function Download(opt) {
             if (download) {
                 // save file
                 if (isDebug) Ti.API.info("saving as: " + f.nativePath);
-                xhr.file = f;
+                xhr.file = f.nativePath;
             }
 
             if (pwd !== "") {
@@ -121,7 +121,7 @@ function Download(opt) {
             }
             xhr.send();
 
-        } 
+        }
         else {
             // already there
             if (isDebug) Ti.API.info("skipping " + url);
