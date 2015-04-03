@@ -93,7 +93,7 @@ function onError(e){
 - timeout: int
 - customname: string - new filename for the download
 - parameter: object - you can set this when starting the download and it will be in the callback return object
-
+- random: boolean (adding random values at the end to ignore caching)
 ___
 
 ### geo.js
