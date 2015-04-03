@@ -126,7 +126,7 @@ function Download(opt) {
                 }
                 xhr.send();
 
-            }
+            } 
             else {
                 // already there
                 if (isDebug) Ti.API.info("skipping " + url);
