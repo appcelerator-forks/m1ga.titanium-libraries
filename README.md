@@ -8,6 +8,9 @@ create a lib folder in your projectname/app/ folder and place the js files there
 
 
 ## Changelog
+- download.js: adding random values
+- cluster.js: bug fixes
+
 - cluster.js: cluster map annotations
 - download.js: use xhr.file to save memory; add parameter to callback
 
