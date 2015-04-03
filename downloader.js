@@ -16,12 +16,13 @@ function Download(opt) {
     var url = opt.url || "";
     var overwrite = opt.overwrite || false;
     var dir = Ti.Filesystem.applicationDataDirectory;
-    var download = opt.download || true;
+    var download = opt.download || false;
     var pwd = opt.password || null;
     var username = opt.username || null;
     var customname = opt.filename || null;
     var isDebug = opt.debug || false;
     var parameter = opt.parameter;
+    var random = (opt.noRandom) ? "" : "?" + Math.floor(Math.random() * 1000); // add a random value at the end to remove caching issues
 
     if (OS_ANDROID) {
         dir = Ti.Filesystem.externalStorageDirectory;
@@ -44,92 +45,110 @@ function Download(opt) {
         }
         var f = Ti.Filesystem.getFile(dir, folder, fname);
 
-        if (!download || (download && overwrite) || (!f.exists() && fname != "null")) {
+        if (Ti.Network.online) {
+            // is online
+            if (!download || (download && overwrite) || (!f.exists() && fname != "null")) {
+                // start download
 
-            if (isDebug) Ti.API.info("get: " + url);
+                if (isDebug) Ti.API.info("get: " + url);
 
-            xhr.ondatastream = function(e) {
-                if (xhr && xhr.getResponseHeader('Content-Length')) {
-                    var full = xhr.getResponseHeader('Content-Length') / 1024 / 1024;
-                    if (progress) progress({
-                        progress: e.progress
-                    });
-                    full = null;
-                }
-            };
-
-            xhr.onload = function() {
-                if (this.readyState == 4) {
-                    var content = null;
-
-                    if (!download) {
-                        // give back the content of the file
-                        content = this.responseData;
+                xhr.ondatastream = function(e) {
+                    if (xhr && progress) {
+                        if (xhr.getResponseHeader('Content-Length')) {
+                            var full = xhr.getResponseHeader('Content-Length') / 1024 / 1024;
+                            progress({
+                                progress: e.progress
+                            });
+                            full = null;
+                        }
                     }
+                };
 
-                    // call success function
-                    if (success) success({
-                        url: url,
-                        file: fname,
-                        content: content,
-                        parameter: parameter
-                    });
+                xhr.onload = function() {
+                    if (this.readyState == 4) {
+                        var content = null;
 
-                    // clean up
+                        if (download) {
+                            // save file
+                            var f = Ti.Filesystem.getFile(dir, folder, fname);
+                            if (isDebug) Ti.API.info("saving as: " + f.nativePath);
+                            f.write(this.responseData);
+                            f = null;
+                        } else {
+                            // give back the content of the file
+                            content = this.responseData;
+                        }
 
-                    content = null;
-                    cleanUp();
-                } else {
-                    // call error function
+                        // call success function
+                        if (success) success({
+                            url: url,
+                            file: fname,
+                            content: content,
+                            parameter: parameter
+                        });
+
+                        // clean up
+
+                        content = null;
+                        cleanUp();
+                    } else {
+                        // call error function
+                        if (error) error({
+                            url: url,
+                            file: fname,
+                            parameter: parameter
+                        });
+
+                        // clean up
+                        cleanUp();
+                        return false;
+                    }
+                };
+                xhr.onerror = function(e) {
+                    if (isDebug) Ti.API.info("download error " + JSON.stringify(e));
                     if (error) error({
                         url: url,
                         file: fname,
                         parameter: parameter
                     });
-
-                    // clean up
                     cleanUp();
                     return false;
+                };
+
+                xhr.timeout = timeout;
+                xhr.open('GET', url + random);
+                if (pwd !== "") {
+                    // set password
+                    var authstr = 'Basic ' + Titanium.Utils.base64encode(username + ":" + pwd);
+                    authstr = authstr.replace(/(\r\n|\n|\r)/gm, "");
+                    xhr.setRequestHeader('Authorization', authstr);
+                    authstr = null;
                 }
-            };
-            xhr.onerror = function(e) {
-                if (isDebug) Ti.API.info("download error " + JSON.stringify(e));
-                if (error) error({
+                xhr.send();
+
+            }
+            else {
+                // already there
+                if (isDebug) Ti.API.info("skipping " + url);
+                Ti.API.info("skipping " + fname);
+                if (success) success({
                     url: url,
                     file: fname,
                     parameter: parameter
                 });
                 cleanUp();
-                return false;
-            };
-
-            xhr.timeout = timeout;
-            xhr.open('GET', url);
-
-            if (download) {
-                // save file
-                if (isDebug) Ti.API.info("saving as: " + f.nativePath);
-                xhr.file = f.nativePath;
             }
-
-            if (pwd !== "") {
-                // set password
-                var authstr = 'Basic ' + Titanium.Utils.base64encode(username + ":" + pwd);
-                authstr = authstr.replace(/(\r\n|\n|\r)/gm, "");
-                xhr.setRequestHeader('Authorization', authstr);
-                authstr = null;
+        } else {
+            // offline
+            if (isDebug) Ti.API.info("download offline");
+            if (error) {
+                if (isDebug) Ti.API.info("call error");
+                error({
+                    url: url,
+                    file: fname,
+                    parameter: parameter
+                });
             }
-            xhr.send();
-
-        }
-        else {
-            // already there
-            if (isDebug) Ti.API.info("skipping " + url);
-            if (success) success({
-                url: url,
-                file: fname,
-                parameter: parameter
-            });
             cleanUp();
         }
     };
@@ -151,7 +170,10 @@ function Download(opt) {
     }
 
     this.abort = function() {
-        xhr.abort();
+        if (xhr) {
+            xhr.abort();
+        }
         cleanUp();
+
     };
 }

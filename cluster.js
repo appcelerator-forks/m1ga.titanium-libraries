@@ -115,7 +115,9 @@ function Cluster(opt) {
                         lon: vlon,
                         lat: vlat,
                         value: 1,
-                        title: map.annoBack[i].title
+                        title: map.annoBack[i].title,
+                        id: map.annoBack[i].id,
+                        image:map.annoBack[i].image
                     });
                 }
             }
@@ -123,13 +125,16 @@ function Cluster(opt) {
 
         var annos = [];
         for (var j in ar) {
+            
             var anno = Alloy.Globals.Map.createAnnotation({
                 latitude: parseFloat(ar[j].lat),
                 longitude: parseFloat(ar[j].lon),
                 pincolor: Alloy.Globals.Map.ANNOTATION_RED,
                 showInfoWindow: (ar[j].value > 1) ? true : false,
+                image: (ar[j].value > 1) ? null : ar[j].image,
                 title: ar[j].title,
-                id: j
+                id: ar[j].id,
+                amount:ar[j].value
             });
             annos.push(anno);
         }
