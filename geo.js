@@ -92,7 +92,10 @@ function Geo(opt) {
         if (e.error) {
             //
             //hasGeo = false;
-            if (isDebug) console.log("error");
+            if (isDebug) {
+                console.error("Geo error");
+                console.error(e.error);
+            }
         } else {
 
             if (e.coords) {
