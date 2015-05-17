@@ -19,16 +19,24 @@ function API(opt) {
         for (var obj in opt.parameter) {
             parameter[obj] = (obj != "media") ? String(opt.parameter[obj]) : opt.parameter[obj];
         }
-        parameter["udid"] = String(Ti.Platform.id);
-        parameter["version"] = String(Ti.App.version);
-        parameter["os"] = (OS_ANDROID) ? "android" : "ios";
+        parameter.udid = String(Ti.Platform.id);
+        parameter.version = String(Ti.App.version);
+        parameter.os = (OS_ANDROID) ? "android" : "ios";
         if (Ti.App.Properties.hasProperty("session")) {
-            parameter["session"] = Ti.App.Properties.getString("session");
+            parameter.session = Ti.App.Properties.getString("session");
         }
     }
     if (cacheTime > 0 && !Ti.App.Properties.hasProperty(cacheID)) {
         Ti.App.Properties.setString(cacheID, 0);
     }
+
+    this.abort = function() {
+        console.log("abort " + xhr);
+        if (xhr) {
+            xhr.abort();
+        }
+    };
+
 
     var xhr = Ti.Network.createHTTPClient({
         onerror: function(e) {
