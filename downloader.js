@@ -16,7 +16,7 @@ function Download(opt) {
     var url = opt.url || "";
     var overwrite = opt.overwrite || false;
     var dir = Ti.Filesystem.applicationDataDirectory;
-    var download = opt.download || false;
+    var download = opt.download || true;
     var pwd = opt.password || null;
     var username = opt.username || null;
     var customname = opt.filename || null;
@@ -67,13 +67,14 @@ function Download(opt) {
                 xhr.onload = function() {
                     if (this.readyState == 4) {
                         var content = null;
-
+                        var f = Ti.Filesystem.getFile(dir, folder, fname);
+                        if (isDebug) Ti.API.info("done loading: " + f.nativePath);
                         if (download) {
                             // save file
-                            var f = Ti.Filesystem.getFile(dir, folder, fname);
-                            if (isDebug) Ti.API.info("saving as: " + f.nativePath);
-                            f.write(this.responseData);
-                            f = null;
+
+                            if (isDebug) Ti.API.info("saved as: " + f.nativePath);
+                            f.remoteBackup = false;
+
                         } else {
                             // give back the content of the file
                             content = this.responseData;
@@ -90,7 +91,9 @@ function Download(opt) {
                         // clean up
 
                         content = null;
+                        f = null;
                         cleanUp();
+
                     } else {
                         // call error function
                         if (error) error({
@@ -116,6 +119,13 @@ function Download(opt) {
                 };
 
                 xhr.timeout = timeout;
+
+                if (download) {
+                    // save file
+                    if (isDebug) Ti.API.info("saving as: " + f.nativePath);
+                    xhr.file = f.nativePath;
+                }
+
                 xhr.open('GET', url + random);
                 if (pwd !== "") {
                     // set password
