@@ -122,8 +122,8 @@ function Download(opt) {
 
                 if (download) {
                     // save file
-                    if (isDebug) Ti.API.info("saving as: " + f.nativePath);
-                    xhr.file = f.nativePath;
+                    if (isDebug) Ti.API.info("saving as: " + f.path);
+                    xhr.file = f.path;
                 }
 
                 xhr.open('GET', url + random);
