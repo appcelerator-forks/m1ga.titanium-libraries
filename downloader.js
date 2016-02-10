@@ -120,13 +120,15 @@ function Download(opt) {
 
                 xhr.timeout = timeout;
 
+                xhr.open('GET', url + random);
+                
                 if (download) {
                     // save file
                     if (isDebug) Ti.API.info("saving as: " + f.path);
                     xhr.file = f.path;
                 }
 
-                xhr.open('GET', url + random);
+                
                 if (pwd !== "") {
                     // set password
                     var authstr = 'Basic ' + Titanium.Utils.base64encode(username + ":" + pwd);
